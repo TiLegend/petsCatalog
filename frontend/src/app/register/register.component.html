@@ -1,0 +1,52 @@
+<div class="card card-container">
+  <div class="form-registration">
+    <div class="column is-4 is-offset-4">
+      <form [formGroup]="regDataFormGroup" (ngSubmit)="regAccount()">
+        <h1 class="title">
+          Register an Account
+        </h1>
+        <div class="box">
+          <label class="label">Username</label>
+          <div class="columns is-gapless">
+            <div class="column is-four-fifths">
+              <p class="control">
+                <input class="form-control" formControlName="username" (change)="usernameChange()">
+              </p>
+              <p class="text-danger" *ngIf="regDataFormGroup.controls.username.errors?.required && regDataFormGroup.controls.username.touched">Username is required</p>
+            </div>
+            <div class="column">
+              <button class="btn btn-lg btn-primary btn-block" type="button" (click)="doCheckUserName()">Check</button>
+            </div>
+          </div>
+          <div class="text-danger" *ngIf="(usernameIsExist)">
+            <strong>{{regDataFormGroup.controls.username.value}}</strong> is exist
+          </div>
+          <div class="text-info" *ngIf="(userNameChecked)">
+            <strong>{{regDataFormGroup.controls.username.value}}</strong> is free
+          </div>
+          <div formGroupName="passwordFormGroup">
+            <hr>
+            <label class="label">Password</label>
+            <p class="control">
+              <input class="form-control" formControlName="password" type="password" placeholder="●●●●●●●">
+            </p>
+            <p class="text-danger" *ngIf="passwordFormGroup.controls.password.errors?.required && passwordFormGroup.controls.password.touched">Password is required</p>
+            <label class="label">Confirm Password</label>
+            <p>
+              <input class="form-control" formControlName="confirmPassword" type="password" placeholder="●●●●●●●">
+            </p>
+            <p class="text-danger" *ngIf="passwordFormGroup.controls.confirmPassword.errors?.required && passwordFormGroup.controls.confirmPassword.touched">confirm password is required</p>
+            <p class="text-danger" *ngIf="passwordFormGroup.errors?.doesMatchPassword">Password does not match</p>
+          </div>
+          <hr>
+          <p class="control">
+            <button type="sumbit" class="btn btn-lg btn-primary btn-block" [disabled]="!regDataFormGroup.valid">Register</button>
+          </p>
+        </div>
+      </form>
+      <p class="has-text-centered">
+        <a href="login">Login</a>
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+<div class="modal">
+    <form [formGroup]="petForm" (ngSubmit)="addPet()">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">{{title}}</p>
+        <button class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+            <div class="columns">
+              <div class="column">
+                  <label class="label">Nickname</label>
+              </div>
+            </div>
+            <div class="columns">
+                <div class="column">
+                    <input class="input" formControlName="nickname">
+                    <p class="notification is-danger" *ngIf="petForm.controls.nickname.errors?.required && petForm.controls.nickname.touched">Nickname is required</p>
+                </div>
+              </div>
+              <div class="columns">
+                  <div class="column">
+                      <input class="input" type="date" formControlName="birthDate">
+                      <p class="notification is-danger" *ngIf="petForm.controls.birthDate.errors?.required && petForm.controls.birthDate.touched">Nickname is required</p>
+                  </div>
+              </div>
+              <div class="columns">
+                  <div class="column">
+                      <input class="input" type="date" formControlName="sex">
+                      <p class="notification is-danger" *ngIf="petForm.controls.sex.errors?.required && petForm.controls.sex.touched">Nickname is required</p>
+                  </div>
+              </div>
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button is-success" type="submit" [disabled]="!petForm.valid">Save</button>
+        <button class="button" type="reset">Cancel</button>
+      </footer>
+    </div>
+  </form>
+  </div>

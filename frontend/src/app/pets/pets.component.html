@@ -1,0 +1,221 @@
+<div class="container">
+    <div *ngIf="isLoadingData" style="text-align:center" id="spinner">
+        <img src="./content/page-loader.gif" />
+    </div>
+    <div style="padding-top:10px">
+        <p-dataTable [value]="pets" [responsive]="true" [rows]="5" [paginator]="true">
+            <p-column field="id" hidden="hidden"></p-column>
+            <p-column field="nickname" header="Nickname" sortable="true" [filter]="true" filterPlaceholder="Search"></p-column>
+            <p-column field="birthDay" header="birthDay" sortable="true" [filter]="true" filterPlaceholder="Search">
+                <ng-template let-col let-pet="rowData" pTemplate="body">
+                    <span>{{pet[col.field] | date: 'dd.MM.yyyy'}}</span>
+                </ng-template>
+            </p-column>
+            <p-column field="petType.petTypeName" header="Pet Type" sortable="true" [filter]="true" filterPlaceholder="Search"></p-column>
+            <p-column field="sex" header="sex" sortable="true" [filter]="true" filterPlaceholder="Search"></p-column>
+            <p-column>
+                <ng-template let-pet="rowData" pTemplate="body">
+                    <button type="button" pButton (click)="editPet(pet)" icon="fa-pencil-square-o"></button>
+                    <button type="button" pButton (click)="deletePet(pet)" icon="fa-times"></button>
+                </ng-template>
+            </p-column>
+        </p-dataTable>
+        <hr>
+        <div class="row">
+            <div class="col-sm2">
+                <button type="button" (click)="addPetDialog();" pButton icon="fa-external-link-square" label="Add Pet"></button>
+            </div>
+            <div class="col-sm">
+                    <input type="number" [(ngModel)]="findPetId" name="findPetId" step="1" min="0" max="10" class="form-control input-md" required>
+
+            </div>
+            <div class="col-sm">
+                <button type="button" [disabled]="!findPetId" (click)="findPet();" pButton icon="fa-external-link-square" label="Search"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p-dialog header="Add Pet" [(visible)]="displayAddDialog" modal="true" width="450" height="500" onHide="alert('Dialog hidden!'); clearData(); addPetForm.reset();">
+    <!-- Add Pet :Using 'Reactive Forms' approach-->
+    <form #addPetForm="ngForm" [formGroup]="addPetFG" class="form-horizontal" style="width:400px;height:500px">
+        <div *ngIf="isAdd">
+            <fieldset>
+                <div class="form-group">
+                    <label class="col-md-1 control-label lblTextLeft" for="name">Nick Name</label>
+                    <div class="col-md-12">
+                        <input id="nickname" name="nickname" type="text" placeholder="Pet Name" class="form-control input-md" formControlName="nickname"
+                            [(ngModel)]="pet.nickname" />
+
+                        <div *ngIf="addPetFG.controls.nickname.errors?.required && (addPetFG.controls.nickname.dirty || addPetFG.controls.nickname.touched)">
+                            <span class="text-danger glyphicon glyphicon-alert">Nick Name is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="category">birthDay</label>
+                    <div class="col-md-12">
+                        <p-calendar id="birthDay" formControlName="birthDay" [(ngModel)]="pet.birthDay" dateFormat="dd.mm.yy" [inline]="false"></p-calendar>
+
+
+                        <div *ngIf="addPetFG.controls.birthDay.touched && addPetFG.controls.birthDay.errors?.required">
+                            <span class="text-danger glyphicon glyphicon-alert">birthDay is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="petType">Pet Type</label>
+                    <div class="col-md-12">
+
+                        <p-dropdown [options]="petTypes" [(ngModel)]="pet.petType" optionLabel="petTypeName" formControlName="petType" dataKey="id"
+                            [autoWidth]="false"></p-dropdown>
+
+                        <div *ngIf="addPetFG.controls.petType.touched && addPetFG.controls.petType.errors?.required">
+                            <span class="text-danger glyphicon glyphicon-alert">Pet Type is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="sex">gender</label>
+                    <div class="col-md-12">
+                        <p-selectButton [options]="genders" [(ngModel)]="pet.sex" formControlName="sex"></p-selectButton>
+
+                        <div *ngIf="addPetFG.controls.sex.touched && addPetFG.controls.sex.errors?.required">
+                            <span class="text-danger glyphicon glyphicon-alert">Pet Type is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label"></label>
+                    <div class="col-md-12">
+                        <button type="button" id="btnSave" name="btnSave" class="btn btn-primary" [disabled]="!addPetFG.valid" (click)="addPet(pet);">
+                            <span class="glyphicon glyphicon-floppy-disk"></span>
+                            Save
+                        </button>
+                        <button id="btnCancel" name="btnCancel" class="btn btn-warning" (click)="clearData();addPetForm.reset();">
+                            <span class="glyphicon glyphicon-floppy-remove"></span>Cancel
+                        </button>
+                        <br />
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </form>
+</p-dialog>
+
+<p-dialog header="Edit Pet" [(visible)]="displayEditDialog" modal="true" width="450" height="500">
+
+    <form #editPetForm="ngForm" [formGroup]="editPetFG" class="form-horizontal" style="width:400px;height:500px">
+        <div *ngIf="isEdit">
+            <fieldset>
+                <div class="form-group">
+                    <label class="col-md-1 control-label lblTextLeft" for="name">Nick Name</label>
+                    <div class="col-md-12">
+                        <input id="nickname" name="nickname" type="text" placeholder="Pet Name" class="form-control input-md" formControlName="nickname"
+                            [(ngModel)]="pet.nickname" />
+
+                        <div *ngIf="editPetFG.controls.nickname.errors?.required && (editPetFG.controls.nickname.dirty || editPetFG.controls.nickname.touched)">
+                            <span class="text-danger glyphicon glyphicon-alert">Nick Name is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="category">birthDay</label>
+                    <div class="col-md-12">
+                        <p-calendar id="birthDay" formControlName="birthDay" [(ngModel)]="pet.birthDay" dateFormat="dd.mm.yy" [inline]="false">
+                        </p-calendar>
+
+                        <div *ngIf="editPetFG.controls.birthDay.touched && editPetFG.controls.birthDay.errors?.required">
+                            <span class="text-danger glyphicon glyphicon-alert">birthDay is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="petType">Pet Type</label>
+                    <div class="col-md-12">
+
+                        <p-dropdown [options]="petTypes" [(ngModel)]="pet.petType" optionLabel="petTypeName" formControlName="petType" dataKey="id"
+                            [autoWidth]="false">
+                        </p-dropdown>
+
+                        <div *ngIf="editPetFG.controls.petType.touched && editPetFG.controls.petType.errors?.required">
+                            <span class="text-danger glyphicon glyphicon-alert">Pet Type is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label text-left lblTextLeft" for="sex">gender</label>
+                    <div class="col-md-12">
+                        <p-selectButton [options]="genders" [(ngModel)]="pet.sex" formControlName="sex"></p-selectButton>
+
+                        <div *ngIf="editPetFG.controls.sex.touched && editPetFG.controls.sex.errors?.required">
+                            <span class="text-danger glyphicon glyphicon-alert">Pet Type is required</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label"></label>
+                    <div class="col-md-12">
+                        <button type="button" id="btnSave" name="btnSave" class="btn btn-primary" [disabled]="!editPetFG.valid" (click)="updatePet(pet);">
+                            <span class="glyphicon glyphicon-floppy-disk"></span>
+                            Save
+                        </button>
+                        <button id="btnCancel" name="btnCancel" class="btn btn-warning" (click)="clearData();editPetForm.reset();">
+                            <span class="glyphicon glyphicon-floppy-remove"></span>Cancel
+                        </button>
+                        <br />
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </form>
+</p-dialog>
+<p-dialog header="Result" [(visible)]="displayPetFindDialog" modal="true" width="420" height="250">
+    <div class="container">
+        <div *ngIf="displayPetFindDialog">
+            <div class="row">
+                <div class="col-sm2">
+                    <h4>nick name:</h4>
+                </div>
+                <div class="col-sm">
+                    <h4>{{pet.nickname}}</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm2">
+                    <h4>Birth Day:</h4>
+                </div>
+                <div class="col-sm">
+                    <h4>{{pet.birthDay | date: 'dd.MM.yyyy'}}</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm2">
+                    <h4>Sex:</h4>
+                </div>
+                <div class="col-sm">
+                    <h4>{{pet.sex}}</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm2">
+                    <h4>Pet Type:</h4>
+                </div>
+                <div class="col-sm">
+                    <h4>{{pet?.petType?.petTypeName}}</h4>
+                </div>
+            </div>
+            <button id="btnCancel" name="btnCancel" class="btn btn-warning" (click)="clearData()">
+                <span class="glyphicon glyphicon-floppy-remove"></span>Cancel
+            </button>
+        </div>
+    </div>
+</p-dialog>
